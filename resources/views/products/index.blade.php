@@ -1,207 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Product Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Query Dashboard</title>
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
         body {
-            background: linear-gradient(135deg, #eef2f7, #f8fbff);
-            padding: 40px;
+            background: linear-gradient(to right, #0f172a, #1e293b);
         }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #2c3e50;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-        }
-
-        .form-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        input:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0,123,255,0.2);
-        }
-
-        button {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 8px;
-            background: #007bff;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        .product-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-radius: 10px;
-            background: #f9fbff;
-            margin-bottom: 10px;
-            border: 1px solid #eaeaea;
-            transition: 0.3s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        .price {
-            font-weight: 600;
-            color: #28a745;
-        }
-
-        .success {
-            background: #e6ffed;
-            color: #1e7e34;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .empty {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-        }
-
-        .footer-note {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* 🔥 NEW: Cache Status Box */
-        .cache-box {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .cache {
-            background: #e6f7ff;
-            color: #007bff;
-        }
-
-        .database {
-            background: #fff3cd;
-            color: #856404;
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
-<body>
 
-<div class="container">
+<body class="min-h-screen text-white">
 
-    <h1>🚀 Product Dashboard</h1>
+    <div class="max-w-6xl mx-auto py-10 px-5">
 
-    <!-- Success Message -->
-    @if(session('success'))
-        <div class="success">
-            {{ session('success') }}
-        </div>
-    @endif
+        <!-- Heading -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-4xl font-bold">
+                    🚀 Cache Query Dashboard
+                </h1>
 
-    <!-- Cache Status -->
-    @if(isset($fromCache))
-        @if($fromCache)
-            <div class="cache-box cache">
-                ⚡ Data loaded from CACHE
+                <p class="text-slate-300 mt-2">
+                    Laravel 12 + Cache Query Package
+                </p>
             </div>
-        @else
-            <div class="cache-box database">
-                🔥 Data loaded from DATABASE
+
+            <!-- Cache Status -->
+            @if($fromCache)
+                <div class="bg-green-500/20 text-green-300 px-4 py-2 rounded-xl">
+                    ⚡ Loaded From Cache
+                </div>
+            @else
+                <div class="bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-xl">
+                    🔥 Loaded From Database
+                </div>
+            @endif
+        </div>
+
+        <!-- Alerts -->
+        @if(session('success'))
+            <div class="bg-green-500/20 border border-green-500 text-green-300 p-4 rounded-xl mb-5">
+                {{ session('success') }}
             </div>
         @endif
-    @endif
 
-    <!-- Add Product -->
-    <div class="card">
-        <h3 style="margin-bottom: 15px;">Add New Product</h3>
-
-        <form method="POST" action="/add-product">
-            @csrf
-
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Product Name" required>
-                <input type="number" name="price" placeholder="Price (₹)" required>
-                <button type="submit">Add</button>
+        @if(session('delete'))
+            <div class="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-xl mb-5">
+                {{ session('delete') }}
             </div>
-        </form>
-    </div>
+        @endif
 
-    <!-- Product List -->
-    <div class="card">
-        <h3 style="margin-bottom: 15px;">Product List (CacheQuery)</h3>
+        <!-- Dashboard Cards -->
+        <div class="grid md:grid-cols-3 gap-5 mb-8">
 
-        @forelse($products as $product)
-            <div class="product-card">
-                <div>
-                    <strong>{{ $product->name }}</strong>
+            <div class="glass p-6 rounded-2xl">
+                <h2 class="text-slate-300 text-sm mb-2">
+                    Total Products
+                </h2>
+
+                <h1 class="text-3xl font-bold">
+                    {{ $products->total() }}
+                </h1>
+            </div>
+
+            <div class="glass p-6 rounded-2xl">
+                <h2 class="text-slate-300 text-sm mb-2">
+                    Cache Time
+                </h2>
+
+                <h1 class="text-3xl font-bold">
+                    5 Min
+                </h1>
+            </div>
+
+            <div class="glass p-6 rounded-2xl">
+                <h2 class="text-slate-300 text-sm mb-2">
+                    Search Results
+                </h2>
+
+                <h1 class="text-3xl font-bold">
+                    {{ $products->count() }}
+                </h1>
+            </div>
+
+        </div>
+
+        <!-- Add Product -->
+        <div class="glass p-6 rounded-2xl mb-8">
+
+            <h2 class="text-2xl font-semibold mb-5">
+                ➕ Add Product
+            </h2>
+
+            <form action="/add-product" method="POST">
+                @csrf
+
+                <div class="grid md:grid-cols-3 gap-4">
+
+                    <input type="text" name="name" placeholder="Product Name"
+                        class="bg-slate-800 border border-slate-700 rounded-xl p-3 outline-none">
+
+                    <input type="number" name="price" placeholder="Price"
+                        class="bg-slate-800 border border-slate-700 rounded-xl p-3 outline-none">
+
+                    <button class="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-5 py-3 font-semibold">
+                        Add Product
+                    </button>
+
                 </div>
-                <div class="price">
-                    ₹{{ number_format($product->price) }}
+            </form>
+
+        </div>
+
+        <!-- Search -->
+        <div class="glass p-6 rounded-2xl mb-8">
+
+            <form method="GET">
+
+                <div class="flex gap-4">
+
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..."
+                        class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 outline-none">
+
+                    <button class="bg-cyan-600 hover:bg-cyan-700 px-6 rounded-xl">
+                        Search
+                    </button>
+
                 </div>
-            </div>
-        @empty
-            <div class="empty">
-                No products available
-            </div>
-        @endforelse
-    </div>
 
-    <div class="footer-note">
-        ⚡ Cached data for 5 minutes for better performance
-    </div>
+            </form>
 
-</div>
+        </div>
+
+        <!-- Product Table -->
+        <div class="glass rounded-2xl overflow-hidden">
+
+            <table class="w-full">
+
+                <thead class="bg-slate-800">
+                    <tr>
+                        <th class="p-4 text-left">#</th>
+                        <th class="p-4 text-left">Product</th>
+                        <th class="p-4 text-left">Price</th>
+                        <th class="p-4 text-left">Created</th>
+                        <th class="p-4 text-center">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @forelse($products as $product)
+
+                        <tr class="border-b border-slate-700 hover:bg-slate-800/40">
+
+                            <td class="p-4">
+                                {{ $product->id }}
+                            </td>
+
+                            <td class="p-4 font-semibold">
+                                {{ $product->name }}
+                            </td>
+
+                            <td class="p-4 text-green-400">
+                                ₹{{ number_format($product->price) }}
+                            </td>
+
+                            <td class="p-4 text-slate-300">
+                                {{ $product->created_at->diffForHumans() }}
+                            </td>
+
+                            <td class="p-4 text-center">
+
+                                <form action="/delete-product/{{ $product->id }}" method="POST">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button onclick="return confirm('Delete Product?')"
+                                        class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+                            <td colspan="5" class="text-center p-8 text-slate-400">
+                                No Products Found
+                            </td>
+                        </tr>
+
+                    @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6">
+            {{ $products->links() }}
+        </div>
+
+    </div>
 
 </body>
+
 </html>

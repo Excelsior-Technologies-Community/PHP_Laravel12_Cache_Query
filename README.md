@@ -592,3 +592,7 @@ PHP_Laravel12_Cache_Query/
 ---
 
 Your PHP_Laravel12_Cache_Query Project is now ready!
+<<<<<<< HEAD
+=======
+
+>>>>>>> development
