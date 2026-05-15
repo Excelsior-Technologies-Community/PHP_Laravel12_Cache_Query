@@ -6,40 +6,62 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
 
-
 class ProductController extends Controller
 {
-    // Show products (with cache)
-    public function index()
-    {
-        // Check if data is from cache
-        $fromCache = Cache::has('products_list');
+    // Show Products
+   public function index(Request $request)
+{
+    $search = $request->search ?? '';
+    $page = $request->page ?? 1;
 
-        // Get from cache or database
-        $products = Cache::remember('products_list', 300, function () {
-            return Product::all();
-        });
+    $cacheKey = 'products_' . md5($search . '_' . $page);
 
-        return view('products.index', compact('products', 'fromCache'));
-    }
+    $fromCache = Cache::has($cacheKey);
 
-    // Store product
+    $products = Cache::remember($cacheKey, 300, function () use ($search) {
+
+        return Product::when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('price', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'asc')
+            ->paginate(4);
+
+    });
+
+    return view('products.index', compact('products', 'fromCache'));
+}
+    // Store Product
     public function store(Request $request)
     {
         $request->validate([
-            'name'  => 'required|string|max:255',
+            'name' => 'required|max:255',
             'price' => 'required|numeric'
         ]);
 
-        // Save to database
         Product::create([
-            'name'  => $request->name,
+            'name' => $request->name,
             'price' => $request->price
         ]);
 
-        // Clear cache after insert
-        Cache::forget('products_list');
+        // Clear cache
+        Cache::flush();
 
-        return redirect()->back()->with('success', 'Product added successfully!');
+        return redirect()->back()
+            ->with('success', 'Product added successfully!');
+    }
+
+    // Delete Product
+    public function destroy($id)
+    {
+        Product::findOrFail($id)->delete();
+
+        // Clear cache
+        Cache::flush();
+
+        return redirect()->back()
+            ->with('delete', 'Product deleted successfully!');
     }
 }
